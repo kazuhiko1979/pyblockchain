@@ -57,13 +57,27 @@ class BlockChain(object):
         if self.verify_transaction_signature(
                 sender_public_key, signature, transaction):
 
-            # if self.calculate_total_amount(sender_blockchain_address) > float(value):
-            #     logger.error({'action': 'add_transaction', 'error': 'No value'})
+            # if self.calculate_total_amount(sender_blockchain_address) < float(value):
+            #     logger.error({'action': 'add_transaction', 'error': 'no_value'})
             #     return False
 
             self.transaction_pool.append(transaction)
             return True
         return False
+
+    def create_transaction(self, sender_blockchain_address,
+                        recipient_blockchain_address, value,
+                        sender_public_key, signature):
+
+        is_transacted = self.add_transaction(
+            sender_blockchain_address, recipient_blockchain_address,
+            value, sender_public_key, signature)
+
+        # TODO
+        # Sync
+
+        return is_transacted
+
 
     def verify_transaction_signature(
             self, sender_public_key, signature, transaction):
@@ -73,15 +87,15 @@ class BlockChain(object):
         signature_bytes = bytes().fromhex(signature)
         verifying_key = VerifyingKey.from_string(
             bytes().fromhex(sender_public_key), curve=NIST256p)
-        verifying_key = verifying_key.verify(signature_bytes, message)
-        return verifying_key
+        verified_key = verifying_key.verify(signature_bytes, message)
+        return verified_key
 
-    def valid_proof(self, transaction, previous_hash, nonce,
+    def valid_proof(self, transactions, previous_hash, nonce,
                     difficulty=MINING_DIFFICULTY):
         guess_block = utils.sorted_dict_by_key({
-            'transactions': transaction,
+            'transactions': transactions,
             'nonce': nonce,
-            'previous': previous_hash
+            'previous_hash': previous_hash
         })
         guess_hash = self.hash(guess_block)
         return guess_hash[:difficulty] == '0'*difficulty
