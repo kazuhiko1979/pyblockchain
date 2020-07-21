@@ -55,7 +55,6 @@ class Wallet(object):
         blockchain_address = base58.b58encode(address_hex).decode('utf-8')
         return blockchain_address
 
-
 class Transaction(object):
 
     def __init__(self, sender_private_key, sender_public_key,
